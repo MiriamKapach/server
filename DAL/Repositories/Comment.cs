@@ -87,7 +87,7 @@ namespace DAL.Repositories
                 else 
                 {
                     logger.LogError("The Comment is null");
-                    return null;
+                    throw new ArgumentNullException(nameof(comment), "The Comment is null");
                 }
             }
             catch (Exception ex)
