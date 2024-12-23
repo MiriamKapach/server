@@ -1,5 +1,6 @@
 ﻿using BLL.Interfaces;
 using BLL.Services;
+using BLL.Validations; 
 using DAL.Interfaces;
 using DAL.Models;
 using DAL.Repositories;
@@ -9,24 +10,18 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
-{
-    DotEnv.Fluent()
-                .WithEnvFiles("../.env.local")
-                .Load();
+#if DEBUG
+Env.Load("../.env.local");
+#endif
 
-}
+string clientUrl = Env.GetString("CLIENT_URL");
+Console.WriteLine(clientUrl);
 
-string clientUrl = Environment.GetEnvironmentVariable("CLIENT_URL");
 
-//builder.Configuration.AddEnvironmentVariables();
-//DotEnv.Load(options: new DotEnvOptions(envFilePaths: ["../.env.local"]));
-
-//builder.Services.AddDbContext<MyDbContext>(options => options.UseMySql("server=127.0.0.1;uid=root;pwd=1234;database=npm;SslMode=Required", new MySqlServerVersion(new Version(8, 0, 21))));
-//builder.Services.AddDbContext<MyDbContext>(options => options.UseMySql(Environment.GetEnvironmentVariable("DB_CONNECTION"), new MySqlServerVersion(new Version(8, 0, 21))));
+// Configure DbContext
 builder.Services.AddDbContext<MyDbContext>();
 
-
+// Configure repositories and services
 builder.Services.AddTransient<ICommentRepository, CommentRepository>();
 builder.Services.AddTransient<ICommentService, CommentService>();
 builder.Services.AddTransient<IDiscussionRepository, DiscussionRepository>();
@@ -36,15 +31,17 @@ builder.Services.AddTransient<ISubjectService, SubjectService>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IUserService, UserService>();
 
+// Add UserValidations
+builder.Services.AddTransient<UserValidations>();
+builder.Services.AddTransient<SubjectValidations>();
+builder.Services.AddTransient<DiscussionValidations>();
 
 
-//builder.Services.AddTransient<IMapper, Mapper>();
+
 builder.Services.AddTransient<IContext, MyDbContext>();
-
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -62,21 +59,16 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-app.UseSwagger();
-    app.UseSwaggerUI();
-//}
-
+// Configure the HTTP request pipeline
 app.UseCors();
-app.UseHttpsRedirection();
 
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
 app.UseAuthorization();
 
-
 app.MapControllers();
-
 app.MapGet("/", () => "server is running");
 
 app.Run();
