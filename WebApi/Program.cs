@@ -1,6 +1,6 @@
 ﻿using BLL.Interfaces;
 using BLL.Services;
-using BLL.Validations; 
+using BLL.Validations;
 using DAL.Interfaces;
 using DAL.Models;
 using DAL.Repositories;
@@ -48,24 +48,27 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        builder =>
-        {
-            builder
-            .WithOrigins(clientUrl)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        });
+        builder => {
+            builder.WithOrigins(clientUrl);
+            builder.AllowAnyMethod();
+            builder.AllowAnyHeader();
+        }
+    );
 });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-app.UseCors();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+app.UseCors();
+
 app.UseAuthorization();
 
 app.MapControllers();
