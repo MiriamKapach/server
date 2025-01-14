@@ -15,8 +15,6 @@ Env.Load("../.env.local");
 #endif
 
 string clientUrl = Env.GetString("CLIENT_URL");
-Console.WriteLine(clientUrl);
-
 
 // Configure DbContext
 builder.Services.AddDbContext<MyDbContext>();
